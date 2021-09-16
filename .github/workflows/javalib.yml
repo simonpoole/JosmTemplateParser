@@ -43,7 +43,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
          name: Test output
-         path: /home/runner/work/mapsplit/mapsplit/build/reports/tests/test/
+         path: /home/runner/work/josmtemplateparser/josmtemplateparser/build/reports/tests/test/
     - name: Run coverage gen
       run: ./gradlew jacocoTestReport
     - name: SonarCloud Scan
