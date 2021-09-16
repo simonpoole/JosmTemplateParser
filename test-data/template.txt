@@ -1,0 +1,7 @@
+House number {addr:housenumber}	addr:housenumber=10
+?{ 'House number {addr:housenumber} at {addr:street}' | 'House number {addr:housenumber}' }	addr:housenumber=10
+?{ 'House number {addr:housenumber} at {addr:street}' | 'House number {addr:housenumber}' }	addr:housenumber=10/addr:street=Abbey road
+?{ admin_level = 2 'NUTS 1' | admin_level = 4 'NUTS 2' | admin_level = 6 'NUTS 3' | 'Admin level {admin_level}'}	admin_level=4
+?{ admin_level = 2 'NUTS 1' | admin_level = 4 'NUTS 2' | admin_level = 6 'NUTS 3' | 'Admin level {admin_level}'}	admin_level=5
+#{admin_level} - {name} !{parent() type=boundary '?{'(part of {admin_level} - {name})' | ''}'}	admin_level=6 name=Vysocina, member of relation admin_level=4 name=Jihovychod   6 - Vysocina (part of Jihovychod)
+{admin_level} - {name} !{parent() type=boundary '?{'(part of {admin_level} - {name})' | ''}'}	admin_level=2/name=Czech republic

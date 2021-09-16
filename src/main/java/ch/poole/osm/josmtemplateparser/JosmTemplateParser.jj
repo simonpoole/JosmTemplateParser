@@ -1,0 +1,258 @@
+/**
+ * Parser for JOSM filter expressions
+ *
+ * @author Simon Poole
+ *
+ * Copyright (c) 2019, 2020 Simon Poole
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+ " OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+options
+{
+  JDK_VERSION = "1.8";
+
+  static = false;
+
+  LOOKAHEAD= 5;
+  IGNORE_CASE = true;
+  FORCE_LA_CHECK = true;
+  CHOICE_AMBIGUITY_CHECK = 2;
+  OTHER_AMBIGUITY_CHECK = 2;
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  UNICODE_INPUT = true;
+}
+
+PARSER_BEGIN(JosmTemplateParser)
+package ch.poole.osm.josmtemplateparser;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.io.ByteArrayInputStream;
+import java.util.Locale;
+import java.util.Stack;
+
+/**
+    {tag} - insert the value of the tag.
+    ?{condition1 'value1' | condition2 'value2' | 'value3'} - use value1 if condition1 is satisfied, else use value2 if condition2 is satisfied, finally use value3 if no condition is satisfied. Condition can be either explicit - in JOSM search syntax - or implicit: The value is used when all tags referenced inside exist.
+    !{search_expression 'template'} - search_expression is evaluated and first matching primitive is used as context for template. Useful for example to get tags of parent relation.
+    \ - use a backslash to escape special characters '{', '}', '?', '!'. E.g. What is this\? It is a {type}\!.
+
+    {special:everything} prints all available values, available for formatting of both primitives and waypoints.
+    {special:id} prints the ID of the osm primitive.
+    {special:localName} prints the localized name, that is the value of name:lang for your language if it is available, or the value of name if it is not. 
+ */
+public class JosmTemplateParser
+{
+  Stack < Boolean > startParen = new Stack < Boolean > ();
+ 
+  public List<Formatter> formatters() throws ParseException
+  {
+    return formatters0();
+  }
+
+  void unsupported(String thing) throws ParseException
+  {
+    ParseException pex = new ParseException("\"" + thing + "\" is unsupported " + token.next.beginLine + ", column " + token.next.beginColumn);
+    pex.currentToken = token;
+    throw pex;
+  }
+}
+
+PARSER_END(JosmTemplateParser)
+
+TOKEN_MGR_DECLS :
+{
+  int bracketNestingDepth;
+  Stack < Integer > state = new Stack < Integer > ();
+}
+
+< DEFAULT >
+TOKEN :
+{
+  < SINGLE_QUOTE : "'" >
+  {
+    state.push(curLexState);
+  }
+  : QUOTED_STRING_STATE // save current state
+}
+
+< QUOTED_STRING_STATE >
+TOKEN :
+{
+  < ENDQUOTE : < SINGLE_QUOTE > >
+  {
+    SwitchTo(state.pop());
+  } // need to switch to prev state 
+| < QUOTED_STRING_CHAR : ~[ "\'", "\\" ] >
+}
+
+< DEFAULT >
+TOKEN :
+{
+  < CURLY_START : "{" >
+| < CURLY_END : "}" >
+| < QUESTION_MARK : "?" >
+| < EXCLAMATION_MARK : "!" >
+}
+
+< DEFAULT >
+TOKEN :
+{
+  < LITERAL : (~[ "\'", "\\", "?", "!", "{", "}" ])+ >
+}
+
+< DEFAULT >
+TOKEN :
+{
+  < LPAREN : "(" >
+  {
+    bracketNestingDepth += 1;
+  }
+  : DEFAULT
+| < RPAREN : ")" >
+  {
+    bracketNestingDepth -= 1;
+  }
+  : DEFAULT
+}
+
+/**
+ * Match a value
+ */
+String literal() :
+{
+  Token t;
+}
+{
+  t = < LITERAL >
+  {
+    return t.image;
+  }
+}
+
+/**
+ * Match char inside quoted string.
+ */
+void getQuotedStringChar(StringBuilder builder) :
+{
+  Token t;
+  String s;
+}
+{
+  (
+    (t = < QUOTED_STRING_CHAR >)
+    {
+      if (t.image.length() < 2)
+      {
+        // CHAR
+        builder.append(t.image.charAt(0));
+      }
+    }
+  | 
+    s = quotedLiteral()
+    {
+      builder.append(s);
+    }
+  )
+}
+
+/**
+ * Match a quoted string.
+ */
+String quotedLiteral() :
+{
+  StringBuilder builder = new StringBuilder();
+}
+{
+  (
+  < SINGLE_QUOTE >
+  )
+  (
+    getQuotedStringChar(builder)
+  )*
+  < ENDQUOTE >
+  {
+    return builder.toString();
+  }
+}
+
+/**
+ * This is fairly convoluted to avoid left recursion 
+ */
+List < Formatter > template() :
+{
+  List < Formatter > result = new ArrayList < Formatter > ();
+  List < Formatter > r2;
+  Token t = null;
+  String s = null;
+}
+{
+  (
+    (
+      //
+      LOOKAHEAD(literal())
+      (
+        (
+          s = literal()
+        )
+        {
+          result.add(new Literal(s));
+        }
+      )
+    |
+      (
+        < CURLY_START > 
+        s = literal() 
+        < CURLY_END >
+      )
+      {
+        result.add(new Tag(s));
+      }
+    )
+    (
+      r2 = template()
+      {
+        result.addAll(r2);
+      }
+    )*
+  )
+  {
+    return result;
+  }
+}
+
+List<Formatter > formatters0() :
+{
+  List<Formatter> r;
+}
+{
+  (
+    r = template()
+  )
+  < EOF >
+  {
+    return r;
+  }
+}
+
+<* >
+TOKEN :
+{
+  < UNEXPECTED_CHAR : ~[ ] >
+}
