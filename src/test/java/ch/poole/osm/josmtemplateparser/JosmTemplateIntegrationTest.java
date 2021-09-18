@@ -66,6 +66,21 @@ public class JosmTemplateIntegrationTest {
         assertEquals("grrr2", f.get(3).format(Type.NODE, null, tags));
     } 
 
+    @Test
+    public void conditionalsTest() {
+        Map<String, String> tags = new HashMap<>();
+        tags.put("test1", "grrr");
+        tags.put("test", "grrr2");
+
+        List<Formatter> f = parse("?{'{test1}' | 'fail'}", false);
+        assertEquals(1, f.size());
+        assertEquals("grrr", f.get(0).format(Type.NODE, null, tags));  
+        
+        f = parse("?{'{test2}' | 'fail'}", false);
+        assertEquals(1, f.size());
+        assertEquals("fail", f.get(0).format(Type.NODE, null, tags));  
+    }
+    
     /**
      * Parse a filter string and return the Condition object
      * 

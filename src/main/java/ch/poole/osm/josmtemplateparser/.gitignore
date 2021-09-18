@@ -2,3 +2,6 @@
 /Token.java
 /TokenMgrError.java
 /ParseException.java
+/JosmTemplateParser.java
+/JosmTemplateParserConstants.java
+/JosmTemplateParserTokenManager.java
