@@ -1,4 +1,4 @@
-package ch.poole.osm.josmfilterparser;
+package ch.poole.osm.josmtemplateparser;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,6 +7,8 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 import ch.poole.osm.josmfilterparser.ElementState.State;
+import ch.poole.osm.josmfilterparser.Meta;
+import ch.poole.osm.josmfilterparser.Type;
 
 /**
  * Dummy Meta implementation for testing
@@ -149,14 +151,19 @@ public class TestMeta implements Meta {
     public boolean isAllInDownloadedArea() {
         return isAllInDownloadedArea;
     }
-    
+
     @Override
     public boolean isChild(@NotNull Type type, @NotNull Meta element, List<Object> parents) {
         return isChild;
     }
-    
+
     @Override
     public boolean isParent(@NotNull Type type, @NotNull Meta meta, @NotNull List<Object> children) {
         return isParent;
+    }
+
+    @Override
+    public @NotNull Meta wrap(Object o) {
+        return new TestMeta();
     }
 }

@@ -2,6 +2,7 @@ package ch.poole.osm.josmtemplateparser;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ import ch.poole.osm.josmfilterparser.Meta;
 import ch.poole.osm.josmfilterparser.Type;
 
 /**
- * Replace {key} with the value
+ * If a condition is true use the corresponding value
  * 
  * @author simon
  *
@@ -43,20 +44,17 @@ public class Conditional implements Formatter {
         }
     }
 
-    private final List<ConditionalValue> conditions = new ArrayList<>();;
+    private final List<ConditionalValue> conditions = new ArrayList<>();
 
     public Conditional(@NotNull List<String> conditionStrings, @NotNull List<String> values) throws ParseException {
-
         for (int i = 0; i < conditionStrings.size(); i++) {
-            String c = conditionStrings.get(i);
+            final String c = conditionStrings.get(i);
+            final String v = values.get(i);
             try {
                 ConditionalValue cv = new ConditionalValue(
-                        c != null && !"".equals(c.trim())
-                                ? (new JosmFilterParser(new ByteArrayInputStream(c.trim().getBytes()))).condition()
-                                : null,
-                        (new JosmTemplateParser(new ByteArrayInputStream(values.get(i).getBytes()))).formatters());
+                        c != null && !"".equals(c.trim()) ? (new JosmFilterParser(new ByteArrayInputStream(c.trim().getBytes()))).condition() : null,
+                        !"".equals(v.trim()) ? (new JosmTemplateParser(new ByteArrayInputStream(v.getBytes()))).formatters() : Arrays.asList(new Literal("")));
                 conditions.add(cv);
-
             } catch (ch.poole.osm.josmfilterparser.ParseException pex) {
                 throw new ParseException("Search expression " + c + " " + pex.getMessage());
             }
@@ -71,42 +69,29 @@ public class Conditional implements Formatter {
         }
         int lastIndex = conditions.size() - 1;
         for (int i = 0; i < lastIndex; i++) {
-            ConditionalValue cv = conditions.get(0);
-            if (cv != null && cv.condition != null) {
-                if (cv.condition.eval(type, meta, tags)) {
-                    return listFormat(cv.values, type, meta, tags);
-                }
-            } else {
-                StringBuilder builder = new StringBuilder();
-                boolean first = true;
-                for (Formatter f : cv.values) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        builder.append(" ");
+            ConditionalValue cv = conditions.get(i);
+            if (cv != null) {
+                if (cv.condition != null) {
+                    if (cv.condition.eval(type, meta, tags)) {
+                        return Util.listFormat(cv.values, type, meta, tags);
                     }
-                    String t = f.format(type, meta, tags);
-                    if ("".equals(t)) {
-                        builder.setLength(0);
-                        continue;
+                } else {
+                    StringBuilder builder = new StringBuilder();
+                    for (Formatter f : cv.values) {
+                        String t = f.format(type, meta, tags);
+                        if ("".equals(t)) {
+                            builder.setLength(0);
+                            continue;
+                        }
+                        builder.append(t);
                     }
-                    builder.append(t);
-                }
-                if (builder.length() > 0) {
-                    return builder.toString();
+                    if (builder.length() > 0) {
+                        return builder.toString();
+                    }
                 }
             }
         }
-        return listFormat(conditions.get(lastIndex).values, type, meta, tags);
-    }
-
-    private String listFormat(List<Formatter> formatters, @NotNull Type type, @Nullable Meta meta,
-            @Nullable Map<String, String> tags) {
-        StringBuilder builder = new StringBuilder();
-        for (Formatter f : formatters) {
-            builder.append(f.format(type, meta, tags));
-        }
-        return builder.toString();
+        return Util.listFormat(conditions.get(lastIndex).values, type, meta, tags);
     }
 
     @Override

@@ -99,6 +99,20 @@ TOKEN :
     SwitchTo(state.pop());
   } // need to switch to prev state 
 | < QUOTED_STRING_CHAR : ~[ "\'", "\\" ] >
+| < ESCAPE : ("\\") >
+  {
+    state.push(curLexState);
+  }
+  : ESCAPE_STATE 
+}
+
+< ESCAPE_STATE >
+TOKEN :
+{
+  < ESCAPED_CHAR: ~[] >
+  {
+    SwitchTo(state.pop());
+  }
 }
 
 < DEFAULT >
@@ -141,7 +155,11 @@ void getQuotedStringChar(StringBuilder builder) :
 }
 {
   (
-    (t = < QUOTED_STRING_CHAR >)
+    (
+      t = < QUOTED_STRING_CHAR >
+    | 
+      t = < ESCAPED_CHAR >
+    )
     {
       if (t.image.length() < 2)
       {
@@ -150,10 +168,7 @@ void getQuotedStringChar(StringBuilder builder) :
       }
     }
   | 
-    s = quotedLiteral()
-    {
-      builder.append(s);
-    }
+    < ESCAPE >
   )
 }
 
@@ -230,6 +245,31 @@ Formatter conditional() :
   }
 }
 
+/**
+ *
+ */
+Formatter search() :
+{
+  String searchExpression = null;
+  String template = null;
+}
+{
+  (
+    < SEARCH_START >
+    (
+      searchExpression = literal()
+      template = quotedLiteral()
+    )
+    (
+      whitespace()
+    )*
+    < CURLY_END >
+  )
+  {
+    return new Search(searchExpression, template);
+  }
+}
+
 // hack to consume whitespace
 void whitespace() :
 {
@@ -259,11 +299,21 @@ List < Formatter > template() :
 {
   (
     (
-      //
+      
       LOOKAHEAD(conditional())
       (
         (
           f = conditional()
+        )
+        {
+          result.add(f);
+        }
+      )
+    |
+      LOOKAHEAD(search())
+      (
+        (
+          f = search()
         )
         {
           result.add(f);
@@ -280,6 +330,7 @@ List < Formatter > template() :
         }
       )
     |
+      LOOKAHEAD(< CURLY_START > literal() < CURLY_END >)
       (
         (
           < CURLY_START > 

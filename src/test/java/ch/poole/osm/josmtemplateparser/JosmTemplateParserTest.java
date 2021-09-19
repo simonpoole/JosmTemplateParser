@@ -13,9 +13,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
+
+import ch.poole.osm.josmfilterparser.Type;
 
 /**
  * 
@@ -56,11 +60,24 @@ public class JosmTemplateParserTest {
 
             String expectedResultCode = null;
             String expectedResult = null;
+            Map<String, String> tags = new HashMap<>();
+            ;
             int lineCount = 0;
             while ((line = inputRules.readLine()) != null) {
-               
-                String[] bits = line.split("\t");
-                System.out.println("Line " + lineCount + " " + bits[0]);
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                String[] b = line.split("\t");
+                tags.clear();
+                if (b.length == 2) {
+                    String[] tempTags = b[1].split("/");
+                    for (String tag : tempTags) {
+                        String[] kv = tag.split("=");
+                        if (kv.length == 2) {
+                            tags.put(kv[0], kv[1]);
+                        }
+                    }
+                }
                 if (inputExpected != null) {
                     String[] expected = inputExpected.readLine().split("\t");
                     expectedResultCode = expected[0];
@@ -70,16 +87,19 @@ public class JosmTemplateParserTest {
                         expectedResult = null;
                     }
                 }
-                if (line.startsWith("#")) {
-                    continue;
-                }
+
                 try {
-                    JosmTemplateParser parser = new JosmTemplateParser(new ByteArrayInputStream(bits[0].getBytes()));
+                    JosmTemplateParser parser = new JosmTemplateParser(new ByteArrayInputStream(b[0].getBytes()));
 
                     List<Formatter> rs = parser.formatters();
-                    
+
                     successful++;
-                    outputExpected.write("0\t" + rs.toString() + "\n");
+                    outputExpected.write("0\t" + rs.toString());
+                    outputExpected.write("\t");
+                    for (Formatter r : rs) {
+                        outputExpected.write(r.format(Type.NODE, null, tags));
+                    }
+                    outputExpected.write("\n");
                     if (expectedResultCode != null) {
                         assertEquals(expectedResultCode, "0");
                         if (expectedResult != null) {
