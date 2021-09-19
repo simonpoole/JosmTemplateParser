@@ -14,7 +14,7 @@ import ch.poole.osm.josmfilterparser.Meta;
 import ch.poole.osm.josmfilterparser.Type;
 
 /**
- * Replace {key} with the value
+ * If a condition is true use the corresponding value
  * 
  * @author simon
  *
@@ -43,7 +43,7 @@ public class Conditional implements Formatter {
         }
     }
 
-    private final List<ConditionalValue> conditions = new ArrayList<>();;
+    private final List<ConditionalValue> conditions = new ArrayList<>();
 
     public Conditional(@NotNull List<String> conditionStrings, @NotNull List<String> values) throws ParseException {
 

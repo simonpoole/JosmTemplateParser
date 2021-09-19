@@ -32,9 +32,9 @@ options
   FORCE_LA_CHECK = true;
   CHOICE_AMBIGUITY_CHECK = 2;
   OTHER_AMBIGUITY_CHECK = 2;
-  DEBUG_PARSER = false;
+  DEBUG_PARSER = true;
   DEBUG_LOOKAHEAD = false;
-  DEBUG_TOKEN_MANAGER = false;
+  DEBUG_TOKEN_MANAGER = true;
   UNICODE_INPUT = true;
 }
 
@@ -230,6 +230,31 @@ Formatter conditional() :
   }
 }
 
+/**
+ *
+ */
+Formatter search() :
+{
+  String searchExpression = null;
+  String template = null;
+}
+{
+  (
+    < SEARCH_START >
+    (
+      searchExpression = literal()
+      template = quotedLiteral()
+    )
+    (
+      whitespace()
+    )*
+    < CURLY_END >
+  )
+  {
+    return new Search(searchExpression, template);
+  }
+}
+
 // hack to consume whitespace
 void whitespace() :
 {
@@ -260,10 +285,20 @@ List < Formatter > template() :
   (
     (
       //
-      LOOKAHEAD(conditional())
+//      LOOKAHEAD(conditional())
+//      (
+//        (
+//          f = conditional()
+//        )
+//        {
+//          result.add(f);
+//        }
+//      )
+//    |
+      // LOOKAHEAD(search())
       (
         (
-          f = conditional()
+          f = search()
         )
         {
           result.add(f);
