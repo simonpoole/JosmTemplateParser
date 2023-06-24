@@ -90,9 +90,9 @@ ext {
 publishing {
     publications {
         Release(MavenPublication) {
-            from components.java
             groupId 'ch.poole.osm'
             artifactId 'JosmTemplateParser'
+            artifact jar
             artifact sourcesJar
             artifact javadocJar
             pom {
