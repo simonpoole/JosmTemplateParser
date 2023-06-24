@@ -17,7 +17,7 @@
         
 Your OSM elements object must either implement the Meta interface or be wrapped in an object that implements it. The object can then be passed to the _Formatter.format_ method, resp. _Util.listFormat_.
 
-## Supported expressions
+Currently there is no documentation of the grammar outside of [Name template details](https://josm.openstreetmap.de/wiki/TaggingPresets#name_templatedetails) which however has multiple errors and inconsistencies. Note that we don't support the _{special:....}_ templates yet. 
 
 ## Including in your project
 
