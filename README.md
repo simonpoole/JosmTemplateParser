@@ -7,6 +7,7 @@
 
         try {
             JosmTemplateParser parser = new JosmTemplateParser(new ByteArrayInputStream(filterString.getBytes()));
+            List<Formatter> formatters = parser.formatters();
             .....
         } catch (ParseException pex) {
             ...
@@ -14,7 +15,7 @@
             ...
         }
         
-Your OSM elements object must either implement the Meta interface or be wrapped in an object that implements it. The object can then be passed to the _eval_ method.
+Your OSM elements object must either implement the Meta interface or be wrapped in an object that implements it. The object can then be passed to the _Formatter.format_ method, resp. _Util.listFormat_.
 
 ## Supported expressions
 
@@ -32,6 +33,6 @@ You can either download the jar from github or add the following to your build.g
 	
 	dependencies {
 	    ...
-	    compile 'ch.poole.osm:JosmTemplateParser:0.0.0'
+	    compile 'ch.poole.osm:JosmTemplateParser:0.1.0'
 	    ...
 	}

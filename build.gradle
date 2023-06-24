@@ -14,14 +14,21 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 
-version = '0.0.0'
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+version = '0.1.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    withJavadocJar()
+    withSourcesJar()
+}
 
 ext {
-    javaccOutput = file(project.buildDir.absolutePath + '/generated/javacc/ch/poole/osm/josmtemplateparser')
-    mainSource = file('src/main/java/ch/poole/osm/josmtemplateparser')
-    testSource = file('src/test/java/ch/poole/osm/josmtemplateparser')
+    javaccOutput = file(project.buildDir.absolutePath + '/generated/javacc/')
+    javaccSourcePath = project.buildDir.absolutePath + '/generated/javacc/'
+    javaccSource = file(javaccSourcePath)
+    mainSource = file('src/main/java/')
+    testSource = file('src/test/java/')
 }
 
 compileJavacc {
@@ -35,23 +42,6 @@ compileJava {
 
 compileTestJava {
     source javaccOutput,mainSource,testSource
-}
-
-javadoc {
-    source mainSource, testSource
-    exclude '**/*.jj'
-    failOnError = false
-}
-
-task sourcesJar(type: Jar) {
-    from mainSource, testSource
-    classifier = 'sources'
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-    //	options.encoding = 'UTF-8'
 }
 
 jacocoTestReport {
@@ -79,6 +69,16 @@ task replaceVersion {
 }
 build.dependsOn replaceVersion
 
+task updateTranslations(type: Exec) {
+    if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+        commandLine 'cmd', '/c', 'tx.exe', 'pull', '-a'
+    } else {
+        commandLine 'tx', 'pull', '-a'
+    }
+}
+updateTranslations.group = 'translation'
+updateTranslations.description = 'Update translations by executing the transifex tx utility'
+
 // test input may change and require rerunning the tests
 test.inputs.files("test-data/template.txt","test-data/template.txt-result")
 
@@ -97,7 +97,7 @@ publishing {
             artifact javadocJar
             pom {
                 name = artifactId
-                description = 'This is a simple parser for the JOSM search/filter language' 
+                description = 'This is a simple parser for the JOSM template language' 
                 url = 'https://github.com/simonpoole/JosmTemplateParser'
                 scm {
                     url = repoUrl

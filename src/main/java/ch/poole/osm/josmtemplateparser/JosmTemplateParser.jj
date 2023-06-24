@@ -61,16 +61,20 @@ public class JosmTemplateParser
 {
   Stack < Boolean > startParen = new Stack < Boolean > ();
  
-  public List<Formatter> formatters() throws ParseException
+  public List < Formatter > formatters() throws JosmTemplateParseException
   {
-    return formatters0();
-  }
-
-  void unsupported(String thing) throws ParseException
-  {
-    ParseException pex = new ParseException("\"" + thing + "\" is unsupported " + token.next.beginLine + ", column " + token.next.beginColumn);
-    pex.currentToken = token;
-    throw pex;
+    try
+    {
+      return formatters0();
+    }
+    catch (JosmTemplateParseException ex)
+    {
+      throw ex;
+    }
+    catch (ParseException ex)
+    {
+      throw new JosmTemplateParseException(ex);
+    }
   }
 }
 
