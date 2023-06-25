@@ -17,7 +17,9 @@
         
 Your OSM elements object must either implement the Meta interface or be wrapped in an object that implements it. The object can then be passed to the _Formatter.format_ method, resp. _Util.listFormat_.
 
-Currently there is no documentation of the grammar outside of [Name template details](https://josm.openstreetmap.de/wiki/TaggingPresets#name_templatedetails) which however has multiple errors and inconsistencies. Note that we don't support the _{special:....}_ templates yet. 
+Currently there is no documentation of the grammar outside of [Name template details](https://josm.openstreetmap.de/wiki/TaggingPresets#name_templatedetails) which however has multiple errors and inconsistencies. 
+
+Note that  the _{special:localName}_ template simply returns the value of the name tag. 
 
 ## Including in your project
 
@@ -33,6 +35,6 @@ You can either download the jar from github or add the following to your build.g
 	
 	dependencies {
 	    ...
-	    compile 'ch.poole.osm:JosmTemplateParser:0.1.1'
+	    compile 'ch.poole.osm:JosmTemplateParser:0.2.0'
 	    ...
 	}

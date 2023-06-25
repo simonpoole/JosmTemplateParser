@@ -60,7 +60,7 @@ import java.util.Stack;
 public class JosmTemplateParser
 {
   Stack < Boolean > startParen = new Stack < Boolean > ();
- 
+
   public List < Formatter > formatters() throws JosmTemplateParseException
   {
     try
@@ -107,13 +107,13 @@ TOKEN :
   {
     state.push(curLexState);
   }
-  : ESCAPE_STATE 
+  : ESCAPE_STATE
 }
 
 < ESCAPE_STATE >
 TOKEN :
 {
-  < ESCAPED_CHAR: ~[] >
+  < ESCAPED_CHAR : ~[ ] >
   {
     SwitchTo(state.pop());
   }
@@ -127,6 +127,14 @@ TOKEN :
 | < CONDITIONAL_START : "?{" >
 | < SEARCH_START : "!{" >
 | < BAR : "|" >
+}
+
+< DEFAULT >
+TOKEN :
+{
+  < EVERYTHING : "special:everything" >
+| < ID : "special:id" >
+| < LOCAL_NAME : "special:localName" >
 }
 
 < DEFAULT >
@@ -261,7 +269,7 @@ Formatter search() :
   (
     < SEARCH_START >
     (
-      searchExpression = literal()
+      searchExpression = literal() 
       template = quotedLiteral()
     )
     (
@@ -296,14 +304,13 @@ List < Formatter > template() :
 {
   List < Formatter > result = new ArrayList < Formatter > ();
   List < Formatter > r2;
-  Token t = null;
   String s = null;
   Formatter f = null;
+  Token t = null;
 }
 {
   (
     (
-      
       LOOKAHEAD(conditional())
       (
         (
@@ -313,7 +320,7 @@ List < Formatter > template() :
           result.add(f);
         }
       )
-    |
+    | 
       LOOKAHEAD(search())
       (
         (
@@ -333,7 +340,23 @@ List < Formatter > template() :
           result.add(new Literal(s));
         }
       )
-    |
+    | 
+      LOOKAHEAD(< CURLY_START > (< ID > | < EVERYTHING > | < LOCAL_NAME >) < CURLY_END >)
+      (
+        (
+          < CURLY_START >
+          (
+            t = < ID >
+          | t = < EVERYTHING >
+          | t = < LOCAL_NAME >
+          )
+          < CURLY_END >
+        )
+        {
+          result.add(new Special(t.image));
+        }
+      )
+    | 
       LOOKAHEAD(< CURLY_START > literal() < CURLY_END >)
       (
         (
@@ -358,9 +381,9 @@ List < Formatter > template() :
   }
 }
 
-List<Formatter > formatters0() :
+List < Formatter > formatters0() :
 {
-  List<Formatter> r;
+  List < Formatter > r;
 }
 {
   (
