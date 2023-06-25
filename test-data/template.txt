@@ -5,6 +5,10 @@ House number {addr:housenumber}	addr:housenumber=10
 ?{ admin_level = 2 'NUTS 1'| admin_level = 4 'NUTS 2'| 'Admin level {admin_level}'}	admin_level=4
 ?{ admin_level = 2 'NUTS 1' | admin_level = 4 'NUTS 2' | admin_level = 6 'NUTS 3' | 'Admin level {admin_level}'}	admin_level=4
 ?{ admin_level = 2 'NUTS 1' | admin_level = 4 'NUTS 2' | admin_level = 6 'NUTS 3' | 'Admin level {admin_level}'}	admin_level=5
+Bus ({operator} {ref} ?{'{from} - {via} - {to}' | '{from} - {to}' | '{from}' | '{to}'})	operator=x/ref=y/from=a/via=b/to=c
+Bus ({operator} {ref} ?{'{from} - {via} - {to}' | '{from} - {to}' | '{from}' | '{to}'}) 	operator=x/ref=y/from=a/to=c
+Bus ({operator} {ref} ?{'{from} - {via} - {to}' | '{from} - {to}' | '{from}' | '{to}'}) 	operator=x/ref=y/from=a
+Bus ({operator} {ref} ?{'{from} - {via} - {to}' | '{from} - {to}' | '{from}' | '{to}'}) 	operator=x/ref=y/to=c
 !{parent type=boundary '(part of {admin_level} - {name})'}
 !{parent type=boundary '?{\'(part of {admin_level} - {name})\' | \'\'}'}
 {admin_level} - {name} !{parent type=boundary '?{\'(part of {admin_level} - {name})\' | \'\'}'}	admin_level=6 name=Vysocina, member of relation admin_level=4 name=Jihovychod   6 - Vysocina (part of Jihovychod)

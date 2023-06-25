@@ -81,7 +81,7 @@ public class Conditional implements Formatter {
                         String t = f.format(type, meta, tags);
                         if ("".equals(t)) {
                             builder.setLength(0);
-                            continue;
+                            break;
                         }
                         builder.append(t);
                     }

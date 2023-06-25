@@ -5,6 +5,10 @@
 0	[?{admin_level = 2NUTS 1 '[NUTS 1]' | admin_level = 4NUTS 2 '[NUTS 2]' | '[Admin level , {admin_level}]'}]	NUTS 2
 0	[?{admin_level = 2NUTS 1 '[NUTS 1]' | admin_level = 4NUTS 2 '[NUTS 2]' | admin_level = 6NUTS 3 '[NUTS 3]' | '[Admin level , {admin_level}]'}]	NUTS 2
 0	[?{admin_level = 2NUTS 1 '[NUTS 1]' | admin_level = 4NUTS 2 '[NUTS 2]' | admin_level = 6NUTS 3 '[NUTS 3]' | '[Admin level , {admin_level}]'}]	Admin level 5
+0	[Bus (, {operator},  , {ref},  , ?{'[{from},  - , {via},  - , {to}]' | '[{from},  - , {to}]' | '[{from}]' | '[{to}]'}, )]	Bus (x y a - b - c)
+0	[Bus (, {operator},  , {ref},  , ?{'[{from},  - , {via},  - , {to}]' | '[{from},  - , {to}]' | '[{from}]' | '[{to}]'}, ) ]	Bus (x y a - c) 
+0	[Bus (, {operator},  , {ref},  , ?{'[{from},  - , {via},  - , {to}]' | '[{from},  - , {to}]' | '[{from}]' | '[{to}]'}, ) ]	Bus (x y a) 
+0	[Bus (, {operator},  , {ref},  , ?{'[{from},  - , {via},  - , {to}]' | '[{from},  - , {to}]' | '[{from}]' | '[{to}]'}, ) ]	Bus (x y c) 
 0	[!{parent type = boundary '(part of  {admin_level}  -  {name} )'}]	
 0	[!{parent type = boundary '?{'[(part of , {admin_level},  - , {name}, )]' | '[]'}'}]	
 0	[{admin_level},  - , {name},  , !{parent type = boundary '?{'[(part of , {admin_level},  - , {name}, )]' | '[]'}'}]	 -  

@@ -27,7 +27,7 @@ public final class Util {
      * @param tags object tags
      * @return a formated string
      */
-    static String listFormat(@NotNull List<Formatter> formatters, @NotNull Type type, @Nullable Meta meta, @Nullable Map<String, String> tags) {
+    public static String listFormat(@NotNull List<Formatter> formatters, @NotNull Type type, @Nullable Meta meta, @Nullable Map<String, String> tags) {
         StringBuilder builder = new StringBuilder();
         for (Formatter f : formatters) {
             builder.append(f.format(type, meta, tags));

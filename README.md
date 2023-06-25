@@ -33,6 +33,6 @@ You can either download the jar from github or add the following to your build.g
 	
 	dependencies {
 	    ...
-	    compile 'ch.poole.osm:JosmTemplateParser:0.1.0'
+	    compile 'ch.poole.osm:JosmTemplateParser:0.1.1'
 	    ...
 	}
