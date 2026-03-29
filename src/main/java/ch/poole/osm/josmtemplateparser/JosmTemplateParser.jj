@@ -48,18 +48,21 @@ import java.util.Locale;
 import java.util.Stack;
 
 /**
-    {tag} - insert the value of the tag.
+    {key} - insert the value of the tag that corresponds to key.
+    {%key} - insert the display value of the tag corresponding to key if one is available, otherwise just insert the value (this is an extension) .
     ?{condition1 'value1' | condition2 'value2' | 'value3'} - use value1 if condition1 is satisfied, else use value2 if condition2 is satisfied, finally use value3 if no condition is satisfied. Condition can be either explicit - in JOSM search syntax - or implicit: The value is used when all tags referenced inside exist.
     !{search_expression 'template'} - search_expression is evaluated and first matching primitive is used as context for template. Useful for example to get tags of parent relation.
     \ - use a backslash to escape special characters '{', '}', '?', '!'. E.g. What is this\? It is a {type}\!.
 
-    {special:everything} prints all available values, available for formatting of both primitives and waypoints.
-    {special:id} prints the ID of the osm primitive.
-    {special:localName} prints the localized name, that is the value of name:lang for your language if it is available, or the value of name if it is not. 
+    {special:everything} - prints all available values, output is implementation dependent.
+    {special:id} - prints the ID of the OSM element.
+    {special:localName} - prints the localized name, that is the value of name:lang for your language if it is available, or the value of name if it is not. 
  */
 public class JosmTemplateParser
 {
-  Stack < Boolean > startParen = new Stack < Boolean > ();
+  private static final String USE_DISPLAY_VALUE = "%"; // extension
+  
+  private Stack < Boolean > startParen = new Stack < Boolean > ();
 
   public List < Formatter > formatters() throws JosmTemplateParseException
   {
@@ -140,7 +143,7 @@ TOKEN :
 < DEFAULT >
 TOKEN :
 {
-  < LITERAL : (~[ "\'", "\\", "?", "!", "|", "{", "}" ])+ >
+  < LITERAL : (~[ "\'", "\\", "?", "!", "|", "{", "}"])+ >
 }
 
 /**
@@ -154,7 +157,7 @@ String literal() :
   t = < LITERAL >
   {
     return t.image;
-  }
+  } 
 }
 
 /**
@@ -307,6 +310,7 @@ List < Formatter > template() :
   String s = null;
   Formatter f = null;
   Token t = null;
+  Token u = null;
 }
 {
   (
@@ -360,12 +364,16 @@ List < Formatter > template() :
       LOOKAHEAD(< CURLY_START > literal() < CURLY_END >)
       (
         (
-          < CURLY_START > 
+          < CURLY_START >
           s = literal() 
           < CURLY_END >
         )
         {
-          result.add(new Tag(s));
+          if (s != null && s.startsWith(USE_DISPLAY_VALUE)) {
+            result.add(new Tag(s.substring(1), true));
+          } else { 
+            result.add(new Tag(s, false));
+          }
         }
       )
     )

@@ -1,6 +1,7 @@
 package ch.poole.osm.josmtemplateparser;
 
 import java.io.ByteArrayInputStream;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ public class Search implements Formatter {
     @NotNull
     public String format(@NotNull Type type, @Nullable Meta meta, @Nullable Map<String, String> tags) {
         if (meta != null) {
-            List<Object> matches = meta.getMatchingElements(condition);
+            List<Serializable> matches = meta.getMatchingElements(condition);
             if (!matches.isEmpty()) {
                 Meta match = meta.wrap(matches.get(0));
                 return Util.listFormat(formatters, match.getType(), match, match.getTags());

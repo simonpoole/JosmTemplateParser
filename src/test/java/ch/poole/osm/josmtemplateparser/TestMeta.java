@@ -1,5 +1,6 @@
 package ch.poole.osm.josmtemplateparser;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +17,7 @@ import ch.poole.osm.josmfilterparser.Type;
  * @author simon
  *
  */
-public class TestMeta implements Meta {
+public class TestMeta implements Meta, Serializable {
 
     long         id;
     long         version;
@@ -118,12 +119,12 @@ public class TestMeta implements Meta {
     }
 
     @Override
-    public Object getPreset(@NotNull String presetPath) {
+    public Serializable getPreset(@NotNull String presetPath) {
         return presetPath;
     }
 
     @Override
-    public boolean matchesPreset(@NotNull Object preset) {
+    public boolean matchesPreset(@NotNull Serializable preset) {
         return preset.equals(this.preset);
     }
 
@@ -153,17 +154,22 @@ public class TestMeta implements Meta {
     }
 
     @Override
-    public boolean isChild(@NotNull Type type, @NotNull Meta element, List<Object> parents) {
+    public boolean isChild(@NotNull Type type, @NotNull Meta element, List<Serializable> parents) {
         return isChild;
     }
 
     @Override
-    public boolean isParent(@NotNull Type type, @NotNull Meta meta, @NotNull List<Object> children) {
+    public boolean isParent(@NotNull Type type, @NotNull Meta meta, @NotNull List<Serializable> children) {
         return isParent;
+    }
+    
+    @Override
+    public String displayValue(@NotNull String key, @NotNull String value) {
+        return value.toUpperCase();
     }
 
     @Override
-    public @NotNull Meta wrap(Object o) {
+    public @NotNull Meta wrap(Serializable o) {
         return new TestMeta();
     }
 }

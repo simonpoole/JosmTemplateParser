@@ -148,7 +148,6 @@ public class JosmTemplateParserTest {
         } catch (FileNotFoundException fnfex) {
             System.err.println("File not found " + fnfex.toString());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (AssertionError ae) {
             System.err.println("Assertion failed for " + line);
@@ -158,7 +157,6 @@ public class JosmTemplateParserTest {
                 try {
                     inputRules.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -166,7 +164,6 @@ public class JosmTemplateParserTest {
                 try {
                     outputExpected.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
