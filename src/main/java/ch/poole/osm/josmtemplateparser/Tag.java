@@ -16,12 +16,16 @@ import ch.poole.osm.josmfilterparser.Type;
  */
 public class Tag implements Formatter {
 
-    private final String key;
+    private static final String USE_DISPLAY_VALUE_PREFIX = "%";
     
-    public Tag(@NotNull String key) {
+    private final String  key;
+    private final boolean useDisplayValue;
+
+    public Tag(@NotNull String key, boolean useDisplayValue) {
         this.key = key;
+        this.useDisplayValue = useDisplayValue;
     }
-    
+
     @Override
     @NotNull
     public String format(@NotNull Type type, @Nullable Meta meta, @Nullable Map<String, String> tags) {
@@ -29,11 +33,23 @@ public class Tag implements Formatter {
             return "";
         }
         String value = tags.get(key);
-        return value != null ? value : "";
+        return value != null ? displayValue(meta, key, value) : "";
     }
-    
+
+    /**
+     * Return a suitable value for display
+     * 
+     * @param meta the Meta object or null
+     * @param key the key
+     * @param value the original value
+     * @return a value suitable for display
+     */
+    private @NotNull String displayValue(@Nullable Meta meta, @NotNull String key, @NotNull String value) {
+        return meta != null && useDisplayValue ? meta.displayValue(key, value) : value;
+    }
+
     @Override
     public String toString() {
-        return "{" + key + "}";
+        return "{" + (useDisplayValue ? USE_DISPLAY_VALUE_PREFIX : "") + key + "}";
     }
 }
