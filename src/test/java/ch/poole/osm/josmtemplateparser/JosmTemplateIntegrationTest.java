@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -99,12 +100,12 @@ public class JosmTemplateIntegrationTest {
             }
 
             @Override
-            public List<Object> getMatchingElements(@NotNull Condition c) {
+            public List<Serializable> getMatchingElements(@NotNull Condition c) {
                 return Arrays.asList(this);
             }
 
             @Override
-            public @NotNull Meta wrap(Object o) {
+            public @NotNull Meta wrap(Serializable o) {
                 return this;
             }
         };
@@ -144,6 +145,9 @@ public class JosmTemplateIntegrationTest {
     @Test
     public void specialLocalNameTest() {
         TestMeta meta = new TestMeta() {
+            
+            private static final long serialVersionUID = 1L;
+
             @Override
             public Map<String, String> getTags() {
                 Map<String, String> tags = new HashMap<>();
@@ -156,6 +160,29 @@ public class JosmTemplateIntegrationTest {
         List<Formatter> f = parse("{special:localName}");
         assertEquals(1, f.size());
         assertEquals("grrr2", f.get(0).format(Type.NODE, meta, null));
+    }
+    
+    @Test
+    public void displayValueTest() {
+        Map<String, String> tags = new HashMap<>();
+        tags.put("te%st1", "grrr");
+        tags.put("name", "grrr2");
+        TestMeta meta = new TestMeta() {
+            
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Map<String, String> getTags() {               
+                return tags;
+            }
+        };
+
+        List<Formatter> f = parse("{%name}");
+        assertEquals(1, f.size());
+        assertEquals("GRRR2", f.get(0).format(Type.NODE, meta, tags));
+        f = parse("{te%st1}");
+        assertEquals(1, f.size());
+        assertEquals("grrr", f.get(0).format(Type.NODE, meta, tags));
     }
 
     /**
